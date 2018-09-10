@@ -109,9 +109,12 @@ let BattleFormats = {
 					case 'leechseed':
 						this.announce("It was sapped by Leech Seed and taken down.");
 						break;
+					case 'spikes':  case 'stealthrock':
+						this.announce("It went down as soon as it came out!");
+						break;
 				}
 			}
-		}
+		},
 	},
 };
 
