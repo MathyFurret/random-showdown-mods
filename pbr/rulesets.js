@@ -1,16 +1,179 @@
 'use strict';
 
+// After-damage move lines.
+// All of these except Focus Punch play when a move deals fatal damage.
+const MOVE_LINES = {
+	'aerialace': "Aerial Ace hits.",
+	'aeroblast': "Blown away by Aeroblast!",
+	'aurasphere': "Hit by Aura Sphere.",
+	'blastburn': "Immolated by Blast Burn.",
+	'blizzard': "A frigid shot from Blizzard!",
+	'bodyslam': "A hard hit from Body Slam.",
+	'bravebird': "Nailed by Brave Bird.",
+	'brickbreak': "Hit by Brick Break.",
+	'closecombat': "Beaten down by Close Combat!",
+	'counter': "Counter hits back.",
+	'crushgrip': "Smashed by Crush Grip!",
+	'darkpulse': "Dark Pulse hits.",
+	'discharge': "Discharge hits.",
+	'doubleedge': "Sliced apart by Double-Edge!",
+	'dracometeor': "Pounded by Draco Meteor.",
+	'dragonclaw': "Ripped by Dragon Claw.",
+	'dragonpulse': "Hit by Dragon Pulse.",
+	'drillpeck': "Nailed by Drill Peck.",
+	'dynamicpunch': "Beaten down by Dynamic Punch!",
+	'earthquake': "Earthquake tears open the ground!",
+	'energyball': "Energy Ball hits.",
+	'eruption': "Nailed by Eruption.",
+	'explosion': "Annihilated by Explosion!",
+	'fireblast': "Torched by Fire Blast.",
+	'fissure': "Fissure opens an abyss of destruction!",
+	'flamethrower': "Singed by Flamethrower.",
+	'flareblitz': "Torched by Flare Blitz.",
+	'flashcannon': "Hit by Flash Cannon.",
+	'focusblast': "Busted by Focus Blast!",
+	'focuspunch': "Slammed by Focus Punch.",
+	'frenzyplant': "Shredded by Frenzy Plant!",
+	'frustration': "Hit by Frustration.",
+	'gigaimpact': "Crushed by Giga Impact.",
+	'guillotine': "Guillotine does massive damage!",
+	'gunkshot': "Hit by Gunk Shot.",
+	'headsmash': "Slammed by Head Smash.",
+	'heatwave': "Burned by Heat Wave.",
+	'horndrill': "Horn Drill impales its target!",
+	'hydrocannon': "Deluged by Hydro Cannon!",
+	'hydropump': "Swamped by Hydro Pump.",
+	'hyperbeam': "Blasted by Hyper Beam!",
+	'hypervoice': "Hyper Voice hits.",
+	'icebeam': "Ice Beam hits.",
+	'judgment': "Judgment has been dealt!",
+	'lastresort': "Last Resort hits.",
+	'lavaplume': "Hit by Lava Plume.",
+	'leafstorm': "Torn up by Leaf Storm.",
+	'magmastorm': "Incinerated by Magma Storm!",
+	'magnitude': "Magnitude shakes the ground.",
+	'megakick': "Mega Kick hits hard.",
+	'megahorn': "Pierced by Megahorn!",
+	'mirrorcoat': "Mirror Coat echoes back.",
+	'muddywater': "Splashed by Muddy Water.",
+	'outrage': "Smacked down by Outrage.",
+	'overheat': "Cooked by Overheat.",
+	'powerwhip': "Lashed by Power Whip.",
+	'psychic': "Hit by Psychic.",
+	'psychoboost': "Torn apart by Psycho Boost!",
+	'return': "Hit by Return.",
+	'roaroftime': "Ripped by Roar of Time!",
+	'rockslide': "Rock slide tumbles down.",
+	'rockwrecker': "Demolished by Rock Wrecker.",
+	'sacredfire': "Set aflame by Sacred Fire!",
+	'seedflare': "Ripped in two by Seed Flare!",
+	'seismictoss': "Hurled by Seismic Toss!",
+	'selfdestruct': "Self-Destruct detonates.",
+	'shadowball': "Shadow Ball hits.",
+	'shadowclaw': "Shadow Claw hits.",
+	'shadowforce': "Complete destruction by Shadow Force!",
+	'sheercold': "Sheer Cold delivers chilling misery!",
+	'silverwind': "Hit by Silver Wind.",
+	'skyattack': "Sky Attack rains down havoc!",
+	'sludgebomb': "Slimed by Sludge Bomb.",
+	'solarbeam': "Seared by Solar Beam!",
+	'spacialrend': "Torn apart by Spacial Rend!",
+	'stoneedge': "Sliced by Stone Edge.",
+	'superpower': "Devastated by Superpower.",
+	'surf': "Soaked by Surf.",
+	'thunder': "Thunder detonates with a boom!",
+	'thunderbolt': "Zapped by Thunderbolt.",
+	'volttackle': "Slammed by Volt Tackle.",
+	'waterspout': "Drenched by Water Spout.",
+	'woodhammer': "Pounded by Wood Hammer.",
+	'zapcannon': "Shocked by Zap Cannon.",
+};
+
+// The following moves will also play the move line when the move does NVE damage.
+// Source: https://docs.google.com/spreadsheets/d/1sVJyneesNW9k5h9o2fQz1uRtTExYUg_sLY2d4wxxbO8/edit#gid=1225109986
+// TODO: Confirm that this list is correct
+const CAN_NVE_LINE = [
+	'aeroblast', 'blastburn', 'blizzard', 'bravebird', 'closecombat',
+	'crushgrip', 'dynamicpunch', 'eruption', 'fireblast', 'flareblitz',
+	'focusblast', 'focuspunch', 'hydrocannon', 'hydropump', 'hyperbeam',
+	'lastresort', 'leafstorm', 'magmastorm', 'megakick', 'megahorn',
+	'overheat', 'powerwhip', 'psychoboost', 'roaroftime', 'sacredfire',
+	'seedflare', 'shadowforce', 'silverwind', 'skyattack', 'solarbeam',
+	'spacialrend', 'stoneedge', 'superpower', 'thunder', 'waterspout',
+	'woodhammer', 'zapcannon',
+];
+
+// The following moves will also play the move line when they are weakened by weather.
+// TODO: Confirm that this list is correct (same source as above)
+const CAN_WEATHER_WEAK_LINE = [
+	'fireblast', 'flareblitz',
+	'hydropump', 'hydrocannon',
+];
+
 /**@type {{[k: string]: ModdedFormatsData}} */
 let BattleFormats = {
 	pbrannouncer: {
 		// ok this is just me playing around with the events system Kappa
+		// My goal is to accurately emulate PRChase whenever possible,
+		// so I don't plan to add lines without a decent certainty of when they trigger.
 		effectType: 'Rule',
 		name: "PBR Announcer",
 		desc: "Puts an announcer in your battle! PRChase 7",
+		onStart: function() {
+			let data = this.effectData.lineData = {};
+
+			// Whether the weather has already shown up. For the rare "again" weather lines.
+			data.weatherHasRun = {};
+		},
+		onBeginTurn: function() {
+			//placeholder
+		},
+		onAfterDamagePriority: 999,
+		onAfterDamage: function(damage, target, source, effect) {
+			let line = [];
+			if (effect && effect.effectType === 'Move' && source && target !== source) {
+				if (effect.isFutureMove) {
+					if (target.hp) {
+						if (effect.id === 'futuresight') {
+							line.push("Attacked by Future Sight! Didn't see that coming!");
+						} else {
+							line.push(target.template.baseSpecies);
+							line.push("is losing its health!");
+						}
+					}
+				} else if (!target.hp) {
+					if (effect.id in MOVE_LINES) {
+						if (effect.id === 'focuspunch') return; // Focus Punch is silent glitch
+						line.push(MOVE_LINES[effect.id]);
+					} else if (this.turn === 1 && !target.willMove()) {
+						// TODO this line is more complex I think...
+						line.push("Aaagh!");
+					} else {
+						switch(this.random(4)) {
+							case 0:
+								line.push("Big hit!");
+								break;
+							case 1:
+								line.push("Slammed 'em!");
+								break;
+							case 2:
+								line.push("Crushing blow!");
+								break;
+							case 3:
+								line.push("Bam!");
+								break;
+						}
+					}
+					// TODO fix this line as well, make sure the source is the first to move in the battle.
+					if (this.turn === 1 && target.willMove()) line.push("A brilliant attack, right from the start!");
+				}
+			}
+			if (line) this.announce(line.join(' '));
+		},
 		onFaintPriority: 999,
 		onFaint: function(target, source, effect) {
 			if (effect && effect.effectType === 'Move' && source && target !== source) {
-				if (effect.id === 'focuspunch') return; // Focus Punch is broken
+				if (effect.id === 'focuspunch') return; // Focus Punch is silent glitch
 				if (effect.isFutureMove) {
 					switch (effect.id) {
 						case 'futuresight':
@@ -66,7 +229,7 @@ let BattleFormats = {
 					case 'solarpower':
 						this.announce("Solar Power worked against it? It's gotta be because of the strong sunlight!");
 						break;
-					case 'psn':
+					case 'psn': case 'tox':
 						this.announce(this.random(2) ? "The damage from poison finished it." : "It's down due do damage from poison.");
 						break;
 					case 'brn':
@@ -115,6 +278,38 @@ let BattleFormats = {
 				}
 			}
 		},
+		onBattleEnded: function(winner) {
+			// TODO: study how the lines can be combined
+			let line = [];
+			if (winner) {
+				switch(this.random(4)) {
+					case 0:
+						line.push("The game is now over.");
+						break;
+					case 1:
+						line.push("Game, set, and match.");
+						break;
+					case 2:
+						line.push("The battle has ended.");
+						break;
+					case 3:
+						line.push("The results are in.");
+						break;
+				}
+				let color = winner.getColor();
+				if (winner.pokemon.length === winner.pokemonLeft && winner.pokemon.length > 1) {
+					line.push(`It's a total victory for the ${color} corner.`);
+				} else if (winner.pokemonLeft === 1 && winner.pokemon.length > 1) {
+					line.push(`The ${color} corner narrowly escaped defeat.`);
+				} else {
+					line.push(this.random(2) ? `The ${color} corner has won the game.` : `The ${color} corner pulled off an impressive victory.`);
+				}
+			} else {
+				line.push(this.random(2) ? "The game is now over." : "The battle has ended.");
+				line.push("The result is a draw.");
+			}
+			this.announce(line.join(' '));
+		}
 	},
 };
 
