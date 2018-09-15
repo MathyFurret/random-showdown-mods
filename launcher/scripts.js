@@ -882,6 +882,8 @@ exports.BattleScripts = {
     chooseLaunch: function(data) {
       // TODO: In at least Gen 5, if you switch out a Pokemon you were going to use an item on,
       // the item still targets the same party slot as the original target.
+      // In Gen 7, the item will target the Pokémon, not the party slot.
+      // Gen 6 still needs testing
 
       if (this.currentRequest !== 'move') {
         return this.emitChoiceError(`Can't launch: You need a ${this.currentRequest} response`);
@@ -1015,6 +1017,7 @@ exports.BattleScripts = {
         choice: 'launch',
         pokemon,
         target: targetPokemon,
+        targetPos: targetPokemon.position,
         item,
         move,
       });
