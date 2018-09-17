@@ -41,6 +41,6 @@ Thus, for instance, the Hyper Potion restores only 120 HP.
 
 ## Credits
 
-Thanks to (https://www.twitch.tv/certainlysomeonehere)[CertainlySomeoneHere] for helping out with a bit of Gen VII research.
+Thanks to [https://www.twitch.tv/certainlysomeonehere](CertainlySomeoneHere) for helping out with a bit of Gen VII research.
 
 Minor thanks to Lycanium Z for helping me get started with the Revive code.
