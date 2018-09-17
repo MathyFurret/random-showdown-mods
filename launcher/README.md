@@ -1,8 +1,10 @@
 # Mathfreak231's Wonder Launcher mod
 
+Version 0.0 alpha.
+
 This mod implements the Wonder Launcher into the Pokémon Showdown simulator.
 
-**THIS MOD IS NOT FINISHED.** Do not yet use this mod.
+**THIS MOD IS EXPERIMENTAL.** Use this mod at your own risk; if it is bugged or crashes your battle, please report it to me!
 
 The Wonder Launcher was a feature from Generation V that could be toggled in link battles.
 Sides get points each turn and use them on items like Potions, Antidotes, X Attacks, and Revives.
@@ -35,9 +37,10 @@ Examples of valid launch choice strings are:
 ## Server specification
 
 As far as battle mechanics go, the Wonder Launcher will be implemented as if the items were used in Gen VII.
-Thus, for instance, the Hyper Potion restores only 120 HP. Also, using an item with no effect is a valid choice,
-but it will fail and not consume points, as happens in Gen VII.
+Thus, for instance, the Hyper Potion restores only 120 HP.
 
 ## Credits
 
-Minor thanks to Lycanium Z for helping with the Revive code.
+Thanks to (https://www.twitch.tv/certainlysomeonehere)[CertainlySomeoneHere] for helping out with a bit of Gen VII research.
+
+Minor thanks to Lycanium Z for helping me get started with the Revive code.

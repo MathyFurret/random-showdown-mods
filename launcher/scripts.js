@@ -317,8 +317,17 @@ exports.BattleScripts = {
 		}
 
     case 'launch':
-      this.runLaunch(action.item, action.target, action.move);
-      //TODO: If a pokemon is revived and its position is < the # of active slots, instantly send that Pokemon out
+      if (this.gen === 5) {
+        // In gen 5, item actions were slot-based
+        this.runLaunch(action.item, action.side.pokemon[action.targetPos], action.move ? action.side.pokemon[action.targetPos].moves[action.moveIndex] : null);
+      } else {
+        this.runLaunch(action.item, action.target, action.move);
+      }
+      if (!action.target.isActive && action.target.position < action.side.active.length) {
+        // A fainted Pokemon in an active slot was revived, so it gets sent out immediately
+        action.side.active[action.target.position] = null;
+        this.switchIn(action.target, action.target.position);
+      }
       break;
 
 		case 'beforeTurn':
@@ -409,7 +418,7 @@ exports.BattleScripts = {
     // whether or not any worked.
 
     item = this.getLauncherItem(item);
-    if (move) move = this.battle.getMove(move);
+    if (move) move = this.getMove(move);
 
     this.add('-message', `${pokemon.side.name} launched the ${item.name} toward ${pokemon.name}! (placeholder)`);
     pokemon.side.launcherPoints -= item.cost;
@@ -447,7 +456,8 @@ exports.BattleScripts = {
 
     if (item.boosts) {
       hitResult = this.boost(item.boosts, pokemon, pokemon, item);
-      didSomething = didSomething || hitResult;
+      // TODO: Find out what message displays if its stat is too high
+      didSomething = didSomething || (hitResult === null ? false : null);
     }
 
     if (item.restorePP) {
@@ -486,13 +496,13 @@ exports.BattleScripts = {
 
     if (item.revive) {
       if (pokemon.fainted) {
-        // FIXME: there's something i'm forgetting here, i just know it
         pokemon.fainted = false;
+        pokemon.faintQueued = false;
         pokemon.status = '';
         pokemon.hp = item.revive === 'max' ? pokemon.maxhp : Math.floor(pokemon.maxhp / 2);
         pokemon.side.pokemonLeft++;
         this.add('-message', `${pokemon.name} regained health! (placeholder)`);
-        this.add('-hint', `If you can't click on the Pokémon after reviving it, you may need to type "/choose switch (num)" to switch it in`);
+        didSomething = true;
       }
     }
 
@@ -501,6 +511,9 @@ exports.BattleScripts = {
       didSomething = didSomething || hitResult;
     }
 
+    if (didSomething === null) {
+      this.add('-message', "But the item doesn't do anything there! (placeholder)");
+    }
     if (didSomething === false) {
       this.add('-message', 'But it had no effect! (placeholder)');
     }
@@ -880,10 +893,12 @@ exports.BattleScripts = {
   		return true;
   	},
     chooseLaunch: function(data) {
-      // TODO: In at least Gen 5, if you switch out a Pokemon you were going to use an item on,
-      // the item still targets the same party slot as the original target.
-      // In Gen 7, the item will target the Pokémon, not the party slot.
-      // Gen 6 still needs testing
+      // In Gen 5, if you switch out a Pokemon you were going to use an item on,
+      // the item will target the selected party slot, not the actual Pokemon.
+      // In Gen 6 and on, the item will target the Pokémon, not the party slot.
+      // Also in Gen 5, Ether targets a move slot, not a move name,
+      // so if you use an Ether on a Pokemon's 3rd move and switch out your target,
+      // the Ether will be used on the 3rd move of the switched in target.
 
       if (this.currentRequest !== 'move') {
         return this.emitChoiceError(`Can't launch: You need a ${this.currentRequest} response`);
@@ -945,6 +960,7 @@ exports.BattleScripts = {
       firstSpaceIndex = itemData.indexOf(' ');
 
       let move = null;
+      let moveIndex;
       let moveGiven = false;
       let moveIsNumber = false;
       let item, itemText, moveText;
@@ -959,11 +975,11 @@ exports.BattleScripts = {
         if (item.exists && item.restorePP) {
           // At this point we're almost definitely parsing a move
           // But if not, we still fall back to checking if the entire string is also a valid item
-          // (even though this is impossible in practice)
+          // (even though this never happens in practice)
           moveGiven = true;
 
           // Find out the move. Same specification as using the move
-          let moveIndex = parseInt(moveText) - 1;
+          moveIndex = parseInt(moveText) - 1;
           moveIsNumber = !isNaN(moveIndex);
 
           if (moveIsNumber) {
@@ -1013,13 +1029,18 @@ exports.BattleScripts = {
         return this.emitChoiceError(`Can't launch: Not enough points to use ${item.name} on ${targetPokemon.name}: it costs ${item.cost}, you have ${this.launcherPoints - this.choice.launcherPointsUsed}`);
       }
 
+      if (item.notImplemented) {
+        return this.emitChoiceError(`Can't launch: ${item.name} exists, but is not fully implemented yet, please do not use it`);
+      }
+
       this.choice.actions.push({
         choice: 'launch',
         pokemon,
         target: targetPokemon,
-        targetPos: targetPokemon.position,
+        targetPos: slot,
         item,
         move,
+        moveIndex: move ? targetPokemon.moves.indexOf(move) : null,
       });
 
       this.choice.launcherPointsUsed += item.cost;
