@@ -420,7 +420,8 @@ exports.BattleScripts = {
     item = this.getLauncherItem(item);
     if (move) move = this.getMove(move);
 
-    this.add('-message', `${pokemon.side.name} launched the ${item.name} toward ${pokemon.name}! (placeholder)`);
+    this.add('');
+    this.add('message', `${pokemon.side.name} launched the ${item.name} toward ${pokemon.name}! (placeholder)`);
     pokemon.side.launcherPoints -= item.cost;
 
     let didSomething = false;
