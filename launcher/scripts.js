@@ -70,90 +70,6 @@ exports.BattleScripts = {
     return item;
   },
 
-  resolveAction: function(action, midTurn = false) {
-    if (!action) throw new Error(`Action not passed to resolveAction`);
-
-    if (!action.side && action.pokemon) action.side = action.pokemon.side;
-    if (!action.move && action.moveid) action.move = this.getMoveCopy(action.moveid);
-    if (!action.choice && action.move) action.choice = 'move';
-    if (!action.priority && action.priority !== 0) {
-      let priorities = {
-        'beforeTurn': 100,
-        'beforeTurnMove': 99,
-        'switch': 7,
-        'runUnnerve': 7.3,
-        'runSwitch': 7.2,
-        'runPrimal': 7.1,
-        'instaswitch': 101,
-        'megaEvo': 6.9,
-        'residual': -100,
-        'team': 102,
-        'start': 101,
-        'launch': 6.95, //TODO confirm prio
-      };
-      if (action.choice in priorities) {
-        action.priority = priorities[action.choice];
-      }
-    }
-    if (!midTurn) {
-      if (action.choice === 'move') {
-        if (!action.zmove && action.move.beforeTurnCallback) {
-          this.addToQueue({choice: 'beforeTurnMove', pokemon: action.pokemon, move: action.move, targetLoc: action.targetLoc});
-        }
-        if (action.mega) {
-          // TODO: Check that the Pokémon is not affected by Sky Drop.
-          // (This is currently being done in `runMegaEvo`).
-          this.addToQueue({
-            choice: 'megaEvo',
-            pokemon: action.pokemon,
-          });
-        }
-      } else if (action.choice === 'switch' || action.choice === 'instaswitch') {
-        if (typeof action.pokemon.switchFlag === 'string') {
-          action.sourceEffect = this.getEffect(action.pokemon.switchFlag);
-        }
-        action.pokemon.switchFlag = false;
-        if (!action.speed) action.speed = action.pokemon.getActionSpeed();
-      }
-    }
-
-    let deferPriority = this.gen >= 7 && action.mega && action.mega !== 'done';
-    if (action.move) {
-      let target = null;
-      action.move = this.getMoveCopy(action.move);
-
-      if (!action.targetLoc) {
-        target = this.resolveTarget(action.pokemon, action.move);
-        action.targetLoc = this.getTargetLoc(target, action.pokemon);
-      }
-
-      if (!action.priority && !deferPriority) {
-        let move = action.move;
-        if (action.zmove) {
-          let zMoveName = this.getZMove(action.move, action.pokemon, true);
-          let zMove = this.getMove(zMoveName);
-          if (zMove.exists && zMove.isZ) {
-            move = zMove;
-          }
-        }
-        let priority = this.runEvent('ModifyPriority', action.pokemon, target, move, move.priority);
-        action.priority = priority;
-        // In Gen 6, Quick Guard blocks moves with artificially enhanced priority.
-        if (this.gen > 5) action.move.priority = priority;
-      }
-    }
-    if (!action.speed) {
-      if ((action.choice === 'switch' || action.choice === 'instaswitch') && action.target) {
-        action.speed = action.target.getActionSpeed();
-      } else if (!action.pokemon) {
-        action.speed = 1;
-      } else if (!deferPriority) {
-        action.speed = action.pokemon.getActionSpeed();
-      }
-    }
-    return /** @type {any} */ (action);
-  },
-
   runAction: function(action) {
     // returns whether or not we ended in a callback
     switch (action.choice) {
@@ -1042,6 +958,7 @@ exports.BattleScripts = {
         item,
         move,
         moveIndex: move ? targetPokemon.moves.indexOf(move) : null,
+        priority: 6.95, //TODO: check actual priority
       });
 
       this.choice.launcherPointsUsed += item.cost;
