@@ -97,6 +97,7 @@ exports.BattleScripts = {
 
     this.add('');
     this.add('message', `${pokemon.side.name} launched the ${item.name} toward ${pokemon.name}! (placeholder)`);
+    this.add('-anim', pokemon, "shoreup", pokemon);
     pokemon.side.launcherPoints -= item.cost;
 
     let didSomething = false;
