@@ -45,7 +45,7 @@ function splitFirst(str, delimiter, limit = 1) {
 }
 
 exports.BattleScripts = {
-  getLauncherItem: function(name) {
+  getLauncherItem(name) {
     if (typeof name !== 'string') return name;
 
     let id = toId(name);
@@ -70,7 +70,7 @@ exports.BattleScripts = {
     return item;
   },
 
-  runAction: function(action) {
+  runAction(action) {
     if (action.choice === 'launch') {
       if (this.gen === 5) {
         // In gen 5, item actions were slot-based
@@ -87,7 +87,7 @@ exports.BattleScripts = {
     return Object.getPrototypeOf(this).runAction.call(this, action);
   },
 
-  runLaunch: function(item, pokemon, move) {
+  runLaunch(item, pokemon, move) {
     // This should look similar to moveHit
     // in that it checks various properties of the effect and keeps track of
     // whether or not any worked.
@@ -200,7 +200,7 @@ exports.BattleScripts = {
     // TODO: Does an item failing power up Stomping Tantrum?
   },
 
-  start: function() {
+  start() {
     if (this.active) return;
 
     if (!this.p1 || !this.p2) {
@@ -258,7 +258,7 @@ exports.BattleScripts = {
     if (!this.currentRequest) this.go();
   },
 
-  nextTurn: function() {
+  nextTurn() {
     for (const side of this.sides) {
       if (side.launcherPoints < 14) side.launcherPoints++;
     }
@@ -267,7 +267,7 @@ exports.BattleScripts = {
   },
 
   side: {
-    choose: function(input) {
+    choose(input) {
       if (!this.currentRequest) {
         return this.emitChoiceError(this.battle.ended ? `Can't do anything: The game is over` : `Can't do anything: It's not your turn`);
       }
@@ -338,7 +338,7 @@ exports.BattleScripts = {
 
       return true;
     },
-    chooseLaunch: function(data) {
+    chooseLaunch(data) {
       // In Gen 5, if you switch out a Pokemon you were going to use an item on,
       // the item will target the selected party slot, not the actual Pokemon.
       // In Gen 6 and on, the item will target the Pokémon, not the party slot.
@@ -495,7 +495,7 @@ exports.BattleScripts = {
       return true;
     },
 
-    getChoice: function() {
+    getChoice() {
       if (this.choice.actions.length > 1 && this.choice.actions.every(action => action.choice === 'team')) {
         return `team ` + this.choice.actions.map(action => action.pokemon.position + 1).join(', ');
       }
@@ -523,13 +523,13 @@ exports.BattleScripts = {
       }).join(', ');
     },
 
-    getRequestData: function() {
+    getRequestData() {
       let data = Object.getPrototypeOf(this).getRequestData.call(this);
       data.launcherPoints = this.launcherPoints;
       return data;
     },
 
-    emitRequest: function(update) {
+    emitRequest(update) {
       Object.getPrototypeOf(this).emitRequest.call(this, update);
       if (this.currentRequest === 'move') this.send('-message', `You currently have ${this.launcherPoints} Wonder Launcher points. (placeholder)`);
     },
