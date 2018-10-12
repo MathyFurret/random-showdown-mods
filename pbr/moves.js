@@ -2,6 +2,31 @@
 
 /**@type {{[k: string]: ModdedMoveData}} */
 let BattleMovedex = {
+  camouflage: {
+    inherit: true,
+    onHit: function (target) {
+      let newType;
+      switch(this.colosseum) {
+        case 'gateway':
+          newType = 'Water';
+          break;
+        case 'waterfall': case 'sunnypark':
+          newType = 'Grass';
+          break;
+        case 'crystal': case 'magma': case 'stargazer':
+          newType = 'Rock';
+          break;
+        case 'sunset':
+          newType = 'Ground';
+          break;
+        default:
+          newType = 'Normal';
+      }
+
+      if (!target.setType(newType)) return false;
+      this.add('-start', target, 'typechange', newType);
+    },
+  },
   moonlight: {
     inherit: true,
     onHit: function (pokemon) {
@@ -24,6 +49,30 @@ let BattleMovedex = {
       } else {
         this.heal(pokemon.maxhp / 2);
       }
+    },
+  },
+  naturepower: {
+    inherit: true,
+    onTryHit: function (target, pokemon) {
+      let move;
+      switch(this.colosseum) {
+        case 'gateway':
+          move = 'hydropump';
+          break;
+        case 'waterfall': case 'sunnypark':
+          move = 'seedbomb';
+          break;
+        case 'crystal': case 'magma': case 'stargazer':
+          move = 'rockslide';
+          break;
+        case 'sunset':
+          move = 'earthquake';
+          break;
+        default:
+          move = 'triattack';
+      }
+      this.useMove(move, pokemon, target);
+      return null;
     },
   },
   solarbeam: {
