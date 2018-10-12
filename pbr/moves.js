@@ -27,6 +27,10 @@ let BattleMovedex = {
       this.add('-start', target, 'typechange', newType);
     },
   },
+  hypnosis: {
+    inherit: true,
+    accuracy: 70,
+  },
   moonlight: {
     inherit: true,
     onHit: function (pokemon) {
