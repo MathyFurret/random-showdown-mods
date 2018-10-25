@@ -63,4 +63,4 @@ BattleAbilities['honeygather'] = {
 	rating: 1.5,
 }
 
-exports.BattleAbilities = BattleAbilities;
+//exports.BattleAbilities = BattleAbilities;
