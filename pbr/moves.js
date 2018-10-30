@@ -57,7 +57,7 @@ let BattleMovedex = {
   },
   naturepower: {
     inherit: true,
-    onTryHit: function (target, pokemon) {
+    onHit: function (pokemon) {
       let move;
       switch(this.colosseum) {
         case 'gateway':
@@ -75,8 +75,7 @@ let BattleMovedex = {
         default:
           move = 'triattack';
       }
-      this.useMove(move, pokemon, target);
-      return null;
+      this.useMove(move, pokemon);
     },
   },
   solarbeam: {
