@@ -230,7 +230,7 @@ let BattleFormats = {
             this.announce("Solar Power worked against it? It's gotta be because of the strong sunlight!");
             break;
           case 'psn': case 'tox':
-            this.announce(this.random(2) ? "The damage from poison finished it." : "It's down due do damage from poison.");
+            this.announce(this.random(2) ? "The damage from poison finished it." : "It's down due to damage from poison.");
             break;
           case 'brn':
             this.announce(this.random(2) ? "It's all burned up now. The damage from its burn was just too much!" : "It's down due to damage from its burn!");
@@ -272,7 +272,7 @@ let BattleFormats = {
           case 'leechseed':
             this.announce("It was sapped by Leech Seed and taken down.");
             break;
-          case 'spikes':  case 'stealthrock':
+          case 'spikes': case 'stealthrock':
             this.announce("It went down as soon as it came out!");
             break;
         }
@@ -312,9 +312,10 @@ let BattleFormats = {
     }
   },
   pbrsleepclause: {
+    // TODO: Does the source actually matter?
     effectType: "Rule",
     name: "PBR Sleep Clause",
-		desc: `Prevents players from putting more than one of their opponent's Pok&eacute;mon to sleep at a time.`,
+    desc: `Prevents players from putting more than one of their opponent's Pok&eacute;mon to sleep at a time.`,
     onSetStatus: function (status, target, source) {
       if (source && source.side === target.side) {
         return;
@@ -331,9 +332,10 @@ let BattleFormats = {
     },
   },
   pbrfreezeclause: {
+    // TODO: Does the source actually matter?
     effectType: "Rule",
     name: "PBR Freeze Clause",
-		desc: "Prevents players from freezing more than one of their opponent's Pok&eacute;mon at a time.",
+    desc: "Prevents players from freezing more than one of their opponent's Pok&eacute;mon at a time.",
     onSetStatus: function (status, target, source) {
       if (source && source.side === target.side) {
         return;
@@ -347,25 +349,25 @@ let BattleFormats = {
       }
     },
   },
-	pbrselfdestructclause: {
-		effectType: "Rule",
-		name: "PBR Self-Destruct Clause",
-		desc: "Causes Self-Destruct and Explosion to lose the battle for the user if all remaining Pok&eacute;mon faint from such a move.",
-		// Should be implemented in scripts.js
-		// TODO: actually implement
-	},
-	pbrdestinybondclause: {
-		effectType: "Rule",
-		name: "PBR Destiny Bond Clause",
-		desc: "Causes Destiny Bond and Perish Song to fail when used by a team's final Pok&eacute;mon.",
-		onTryMove: function(pokemon, target, move) {
-			const bannedMoves = ['perishsong', 'destinybond'];
-			if (bannedMoves.includes(move.id) && !this.canSwitch(pokemon.side)) {
-				this.add('-fail', target);
-				return false;
-			}
-		},
-	},
+  pbrselfdestructclause: {
+    effectType: "Rule",
+    name: "PBR Self-Destruct Clause",
+    desc: "Causes Self-Destruct and Explosion to lose the battle for the user if all remaining Pok&eacute;mon faint from such a move.",
+    // Should be implemented in scripts.js
+    // TODO: actually implement
+  },
+  pbrdestinybondclause: {
+    effectType: "Rule",
+    name: "PBR Destiny Bond Clause",
+    desc: "Causes Destiny Bond and Perish Song to fail when used by a team's final Pok&eacute;mon.",
+    onTryMove: function(pokemon, target, move) {
+      const bannedMoves = ['perishsong', 'destinybond'];
+      if (bannedMoves.includes(move.id) && !this.canSwitch(pokemon.side)) {
+        this.add('-fail', target);
+        return false;
+      }
+    },
+  },
 };
 
 exports.BattleFormats = BattleFormats;

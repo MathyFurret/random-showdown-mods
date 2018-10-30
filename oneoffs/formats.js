@@ -46,177 +46,177 @@ let Formats = [
       * (HP remaining at end of 3rd turn) / (HP remaining at beginning of 1st turn)
       * Pokemon with the highest ratio wins the category.
       */
-		name: "[Gen 7] Battle Arena",
-		desc: `A format based on Emerald's Battle Arena.`,
-		threads: [],
-		mod: 'gen7',
+    name: "[Gen 7] Battle Arena",
+    desc: `A format based on Emerald's Battle Arena.`,
+    threads: [],
+    mod: 'gen7',
     // You may modify the ruleset
-		ruleset: ['Pokemon', 'Cancel Mod', 'Team Preview'],
-		// debug: true, // Uncomment for exact HP and other debugging features
+    ruleset: ['Pokemon', 'Cancel Mod', 'Team Preview'],
+    // debug: true, // Uncomment for exact HP and other debugging features
     // TODO: Let players order all their pokes in team preview
-		onTeamPreviewPriority: 999,
-		onTeamPreview: function() {
-	    this.effectData.activeTurns = 0;
-	    this.effectData.pokemonData = {};
-	    this.effectData.p1pokemon = 0;
-	    this.effectData.p2pokemon = 0;
-	  },
-	  onBeforeTurnPriority: 999,
-	  onBeforeTurn: function(pokemon) {
-	    if (this.effectData.activeTurns === 0) {
-	      // initialize scores
-	      this.effectData.pokemonData[pokemon.side.id] = {
-	        mind: 0,
-	        skill: 0,
-	        startingHp: pokemon.hp,
-	        /**
-	          * Move this turn result for the purposes of the Battle Arena.
-	          * true: move succeeded, +1
-	          * false: move failed, -2
-	          * null: move failed, 0
-	          * undefined: use pokemon.moveThisTurnResult
-	          */
-	        moveThisTurnResult: undefined,
-	      }
-	    }
+    onTeamPreviewPriority: 999,
+    onTeamPreview: function() {
+      this.effectData.activeTurns = 0;
+      this.effectData.pokemonData = {};
+      this.effectData.p1pokemon = 0;
+      this.effectData.p2pokemon = 0;
+    },
+    onBeforeTurnPriority: 999,
+    onBeforeTurn: function(pokemon) {
+      if (this.effectData.activeTurns === 0) {
+        // initialize scores
+        this.effectData.pokemonData[pokemon.side.id] = {
+          mind: 0,
+          skill: 0,
+          startingHp: pokemon.hp,
+          /**
+            * Move this turn result for the purposes of the Battle Arena.
+            * true: move succeeded, +1
+            * false: move failed, -2
+            * null: move failed, 0
+            * undefined: use pokemon.moveThisTurnResult
+            */
+          moveThisTurnResult: undefined,
+        }
+      }
 
-	    //increment the Mind counter
-	    const action = this.willMove(pokemon);
-	    if (action) {
-	      if (action.move.stallingMove || action.move.id === 'fakeout') {
-	        this.effectData.pokemonData[pokemon.side.id].mind--;
-	      } else if (action.move.category !== 'Status'
-	          && !['counter', 'mirrorcoat', 'bide', 'metalburst'].includes(action.move.id)) {
-	        this.effectData.pokemonData[pokemon.side.id].mind++;
-	      }
-	    }
-	  },
+      //increment the Mind counter
+      const action = this.willMove(pokemon);
+      if (action) {
+        if (action.move.stallingMove || action.move.id === 'fakeout') {
+          this.effectData.pokemonData[pokemon.side.id].mind--;
+        } else if (action.move.category !== 'Status'
+            && !['counter', 'mirrorcoat', 'bide', 'metalburst'].includes(action.move.id)) {
+          this.effectData.pokemonData[pokemon.side.id].mind++;
+        }
+      }
+    },
 
-	  // Prevent switching
-	  onTrapPokemonPriority: -999,
-	  onTrapPokemon: function(pokemon) {
-	    pokemon.trapped = true;
-	  },
-	  onDragOutPriority: 999,
-	  onDragOut: false,
-		onAfterMove: function(pokemon) {
-			pokemon.switchFlag = false;
-		},
-	  // TODO: What actually happens with phazing moves?
-	  // TODO: How should U-Turn work?
+    // Prevent switching
+    onTrapPokemonPriority: -999,
+    onTrapPokemon: function(pokemon) {
+      pokemon.trapped = true;
+    },
+    onDragOutPriority: 999,
+    onDragOut: false,
+    onAfterMove: function(pokemon) {
+      pokemon.switchFlag = false;
+    },
+    // TODO: What actually happens with phazing moves?
+    // TODO: How should U-Turn work?
 
-	  // Fake Out detector
-	  onFlinchPriority: -999,
-	  onFlinch: function(pokemon) {
-	    if (pokemon.volatiles.flinch.sourceEffect.id === 'fakeout') {
-	      this.effectData.pokemonData[pokemon.side.id].moveThisTurnResult = null;
-	    }
-	  },
+    // Fake Out detector
+    onFlinchPriority: -999,
+    onFlinch: function(pokemon) {
+      if (pokemon.volatiles.flinch.sourceEffect.id === 'fakeout') {
+        this.effectData.pokemonData[pokemon.side.id].moveThisTurnResult = null;
+      }
+    },
 
-	  // TODO: Detect the move was blocked by Protect
+    // TODO: Detect the move was blocked by Protect
 
-	  onResidualOrder: 999,
-	  onResidual: function() {
-	    if (this.sides.some(side => side.active[0].fainted)) {
-	      // someone fainted, reset
-	      this.effectData.activeTurns = 0;
-	    } else {
+    onResidualOrder: 999,
+    onResidual: function() {
+      if (this.sides.some(side => side.active[0].fainted)) {
+        // someone fainted, reset
+        this.effectData.activeTurns = 0;
+      } else {
 
-	      for (const side of this.sides) {
-	        const pokemon = side.active[0];
-	        const pokemonData = this.effectData.pokemonData[pokemon.side.id];
+        for (const side of this.sides) {
+          const pokemon = side.active[0];
+          const pokemonData = this.effectData.pokemonData[pokemon.side.id];
 
-	        // skill counter
-	        switch (pokemonData.moveThisTurnResult === undefined ? pokemon.moveThisTurnResult : pokemonData.moveThisTurnResult) {
-	          case true:
-	            pokemonData.skill++;
-	            break;
-	          case false:
-	            pokemonData.skill -= 2;
-	            break;
-	          default:
-	            // do nothing
-	        }
-	      }
+          // skill counter
+          switch (pokemonData.moveThisTurnResult === undefined ? pokemon.moveThisTurnResult : pokemonData.moveThisTurnResult) {
+            case true:
+              pokemonData.skill++;
+              break;
+            case false:
+              pokemonData.skill -= 2;
+              break;
+            default:
+              // do nothing
+          }
+        }
 
-	      if (++this.effectData.activeTurns === 3) {
-	        this.add('');
-					this.add('message', "Time's up! Time for the judging! (placeholder)");
-	        const p1data = this.effectData.pokemonData.p1;
-	        const p2data = this.effectData.pokemonData.p2;
-	        let p1score = 0;
-	        let p2score = 0;
+        if (++this.effectData.activeTurns === 3) {
+          this.add('');
+          this.add('message', "Time's up! Time for the judging! (placeholder)");
+          const p1data = this.effectData.pokemonData.p1;
+          const p2data = this.effectData.pokemonData.p2;
+          let p1score = 0;
+          let p2score = 0;
 
-	        let mindWinner = p1data.mind - p2data.mind;
-	        if (mindWinner > 0) {
-						this.add('-message', `${this.p1.active[0].name} won in Mind! (placeholder)`);
-	          p1score++;
-	        } else if (mindWinner < 0) {
-						this.add('-message', `${this.p2.active[0].name} won in Mind! (placeholder)`);
-	          p2score++;
-	        } else {
-						this.add('-message', "In Mind, it's a tie! (placeholder)");
-					}
+          let mindWinner = p1data.mind - p2data.mind;
+          if (mindWinner > 0) {
+            this.add('-message', `${this.p1.active[0].name} won in Mind! (placeholder)`);
+            p1score++;
+          } else if (mindWinner < 0) {
+            this.add('-message', `${this.p2.active[0].name} won in Mind! (placeholder)`);
+            p2score++;
+          } else {
+            this.add('-message', "In Mind, it's a tie! (placeholder)");
+          }
 
-	        let skillWinner = p1data.skill - p2data.skill;
-	        if (skillWinner > 0) {
-						this.add('-message', `${this.p1.active[0].name} won in Skill! (placeholder)`);
-	          p1score++;
-	        } else if (skillWinner < 0) {
-						this.add('-message', `${this.p2.active[0].name} won in Skill! (placeholder)`);
-	          p2score++;
-	        } else {
-						this.add('-message', "In Skill, it's a tie! (placeholder)");
-					}
+          let skillWinner = p1data.skill - p2data.skill;
+          if (skillWinner > 0) {
+            this.add('-message', `${this.p1.active[0].name} won in Skill! (placeholder)`);
+            p1score++;
+          } else if (skillWinner < 0) {
+            this.add('-message', `${this.p2.active[0].name} won in Skill! (placeholder)`);
+            p2score++;
+          } else {
+            this.add('-message', "In Skill, it's a tie! (placeholder)");
+          }
 
-	        // TODO To what precision are these measured?
-	        let p1hpRatio = this.p1.active[0].hp / p1data.startingHp;
-	        let p2hpRatio = this.p2.active[0].hp / p2data.startingHp;
-	        if (p1hpRatio > p2hpRatio) {
-						this.add('-message', `${this.p1.active[0].name} won in Body! (placeholder)`);
-	        	p1score++;
-	        } else if (p2hpRatio > p1hpRatio) {
-						this.add('-message', `${this.p2.active[0].name} won in Body! (placeholder)`);
-	        	p2score++;
-	        } else {
-						this.add('-message', "In Body, it's a tie! (placeholder)");
-					}
+          // TODO To what precision are these measured?
+          let p1hpRatio = this.p1.active[0].hp / p1data.startingHp;
+          let p2hpRatio = this.p2.active[0].hp / p2data.startingHp;
+          if (p1hpRatio > p2hpRatio) {
+            this.add('-message', `${this.p1.active[0].name} won in Body! (placeholder)`);
+            p1score++;
+          } else if (p2hpRatio > p1hpRatio) {
+            this.add('-message', `${this.p2.active[0].name} won in Body! (placeholder)`);
+            p2score++;
+          } else {
+            this.add('-message', "In Body, it's a tie! (placeholder)");
+          }
 
-	        if (p1score <= p2score) {
-						this.add('message', `${this.p1.active[0].name} was taken out in a judge's decision! (placeholder)`);
-	          this.faint(this.p1.active[0]);
-	        }
-	        if (p2score <= p1score) {
-						this.add('message', `${this.p2.active[0].name} was taken out in a judge's decision! (placeholder)`);
-	          this.faint(this.p2.active[0]);
-	        }
+          if (p1score <= p2score) {
+            this.add('message', `${this.p1.active[0].name} was taken out in a judge's decision! (placeholder)`);
+            this.faint(this.p1.active[0]);
+          }
+          if (p2score <= p1score) {
+            this.add('message', `${this.p2.active[0].name} was taken out in a judge's decision! (placeholder)`);
+            this.faint(this.p2.active[0]);
+          }
 
-	        this.effectData.activeTurns = 0;
-	      }
-	    }
+          this.effectData.activeTurns = 0;
+        }
+      }
 
-	    // Hack to enforce switching Pokemon in order; faint them now
-	    // TODO: What happens if the last matchup results in a draw from judging?
-	    this.faintMessages();
-	    if (this.ended) return;
+      // Hack to enforce switching Pokemon in order; faint them now
+      // TODO: What happens if the last matchup results in a draw from judging?
+      this.faintMessages();
+      if (this.ended) return;
 
-	    this.checkFainted();
-	    if (this.p1.active[0].switchFlag) {
-	      this.insertQueue({
-	        choice: 'instaswitch',
-	        pokemon: this.p1.active[0],
-	        target: this.p1.pokemon[++this.effectData.p1pokemon],
-	      });
-	    }
-	    if (this.p2.active[0].switchFlag) {
-	      this.insertQueue({
-	        choice: 'instaswitch',
-	        pokemon: this.p2.active[0],
-	        target: this.p2.pokemon[++this.effectData.p2pokemon],
-	      });
-	    }
-	  },
-	},
+      this.checkFainted();
+      if (this.p1.active[0].switchFlag) {
+        this.insertQueue({
+          choice: 'instaswitch',
+          pokemon: this.p1.active[0],
+          target: this.p1.pokemon[++this.effectData.p1pokemon],
+        });
+      }
+      if (this.p2.active[0].switchFlag) {
+        this.insertQueue({
+          choice: 'instaswitch',
+          pokemon: this.p2.active[0],
+          target: this.p2.pokemon[++this.effectData.p2pokemon],
+        });
+      }
+    },
+  },
 
   {
     /**
@@ -246,28 +246,28 @@ let Formats = [
     // You may modify the ruleset
     ruleset: ['Pokemon', 'Cancel Mod', 'Team Preview'],
     // debug: true, // Uncomment for debug features such as exact HP reporting
-		onBeforeTurnPriority: 999,
+    onBeforeTurnPriority: 999,
     onBeforeTurn: function(pokemon) {
-			function randomDiscreteDistribution(arr, prng) {
-			  // example: arr = [1, 1, 3, 1]
-			  // 0, 1, 3 have a 1/6 chance to be chosen
-			  // 2 has a 3/6 chance
-			  const cumSum = [];
-			  let sum = 0;
-			  for (let n of arr) {
-			    cumSum.push(sum += n);
-			  }
+      function randomDiscreteDistribution(arr, prng) {
+        // example: arr = [1, 1, 3, 1]
+        // 0, 1, 3 have a 1/6 chance to be chosen
+        // 2 has a 3/6 chance
+        const cumSum = [];
+        let sum = 0;
+        for (let n of arr) {
+          cumSum.push(sum += n);
+        }
 
-			  let rand;
-			  if (prng) {
-			    rand = prng.next() * sum;
-			  } else {
-			    rand = Math.random() * sum;
-			  }
-			  for (let i = 0; i < cumSum.length; i++) {
-			    if (rand < cumSum[i]) return i;
-			  }
-			}
+        let rand;
+        if (prng) {
+          rand = prng.next() * sum;
+        } else {
+          rand = Math.random() * sum;
+        }
+        for (let i = 0; i < cumSum.length; i++) {
+          if (rand < cumSum[i]) return i;
+        }
+      }
 
       const action = this.willMove(pokemon);
       if (!action) return;
@@ -367,8 +367,8 @@ let Formats = [
     onBeforeMovePriority: 999,
     onBeforeMove: function(pokemon, target, move) {
       if (move.incapable) {
-				this.add('');
-        this.add('-message', `${pokemon.name} appears incapable of using its power!`);
+        this.add('');
+        this.add('message', `${pokemon.name} appears incapable of using its power!`);
         return false;
       }
     },
