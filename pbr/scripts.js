@@ -49,8 +49,8 @@ let BattleScripts = {
   side: {
     getColor() {
       return this.n ? 'red' : 'blue';
-    }
-  }
+    },
+  },
 };
 
 exports.BattleScripts = BattleScripts;

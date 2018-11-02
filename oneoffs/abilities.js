@@ -17,7 +17,7 @@ BattleAbilities['quickslash'] = {
   id: 'quickslash',
   name: "Quick Slash",
   rating: 4,
-}
+};
 
 /**
   * Illuminate, Honey Gather buffs, suggested by woenx
@@ -29,7 +29,7 @@ BattleAbilities['illuminate'] = {
   // POOR CLIENT SUPPORT (Ability activation does not show, there is only a "But it failed!" message)
   inherit: true,
   shortDesc: "Prevents foes' evasiveness from rising.",
-  onFoeBoost: function(boost, target, source, effect) {
+  onFoeBoost: function(boost, target) {
     if (boost.evasion && boost.evasion > 0) {
       delete boost.evasion;
       this.add("-fail", target, "boost", "evasiveness", "[from] ability: Illuminate", "[of] " + this.effectData.target);
@@ -61,6 +61,6 @@ BattleAbilities['honeygather'] = {
     }
   },
   rating: 1.5,
-}
+};
 
 //exports.BattleAbilities = BattleAbilities;

@@ -315,7 +315,7 @@ exports.BattleLauncherItems = {
     onUse: function(pokemon) {
       if (!pokemon.isActive) return null;
       pokemon.clearBoosts();
-			this.add('-clearboost', pokemon);
+      this.add('-clearboost', pokemon);
     },
     cost: 9,
   },

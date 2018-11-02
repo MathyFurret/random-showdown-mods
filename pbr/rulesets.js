@@ -149,7 +149,7 @@ let BattleFormats = {
             // TODO this line is more complex I think...
             line.push("Aaagh!");
           } else {
-            switch(this.random(4)) {
+            switch (this.random(4)) {
               case 0:
                 line.push("Big hit!");
                 break;
@@ -188,7 +188,7 @@ let BattleFormats = {
         } else if (source.lastDamage >= target.maxhp / 2) {
           this.announce(this.random(2) ? "A huge amount of damage! It's down!" : "Taken down by an intense blow.");
         } else {
-          switch(this.random(3)) {
+          switch (this.random(3)) {
             case 0:
               this.announce("It went down!");
               break;
@@ -201,7 +201,7 @@ let BattleFormats = {
           }
         }
       } else {
-        switch(effect && effect.id) {
+        switch (effect && effect.id) {
           case 'confused':
             this.announce("Ouch. That was rather self-destructive.");
             break;
@@ -282,7 +282,7 @@ let BattleFormats = {
       // TODO: study how the lines can be combined
       let line = [];
       if (winner) {
-        switch(this.random(4)) {
+        switch (this.random(4)) {
           case 0:
             line.push("The game is now over.");
             break;
@@ -309,7 +309,7 @@ let BattleFormats = {
         line.push("The result is a draw.");
       }
       this.announce(line.join(' '));
-    }
+    },
   },
   pbrsleepclause: {
     // TODO: Does the source actually matter?

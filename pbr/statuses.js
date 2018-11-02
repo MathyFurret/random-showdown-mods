@@ -9,8 +9,8 @@ let BattleStatuses = {
     effectType: 'Weather',
     duration: 0,
     onStart: function() {
-      this.add('-message','The fog is deep...');
-      this.add('-weather','Fog');
+      this.add('-message', 'The fog is deep...');
+      this.add('-weather', 'Fog');
     },
     onModifyAccuracy: function (accuracy) {
       if (typeof accuracy !== 'number') return;
@@ -19,8 +19,8 @@ let BattleStatuses = {
     },
     onResidualOrder: 1,
     onResidual: function() {
-      this.add('-message','The fog is deep...');
-      this.add('-weather','Fog','[upkeep]');
+      this.add('-message', 'The fog is deep...');
+      this.add('-weather', 'Fog', '[upkeep]');
     },
   },
 };

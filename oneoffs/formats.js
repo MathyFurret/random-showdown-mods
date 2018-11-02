@@ -77,7 +77,7 @@ let Formats = [
             * undefined: use pokemon.moveThisTurnResult
             */
           moveThisTurnResult: undefined,
-        }
+        };
       }
 
       //increment the Mind counter
@@ -121,7 +121,6 @@ let Formats = [
         // someone fainted, reset
         this.effectData.activeTurns = 0;
       } else {
-
         for (const side of this.sides) {
           const pokemon = side.active[0];
           const pokemonData = this.effectData.pokemonData[pokemon.side.id];
@@ -322,7 +321,7 @@ let Formats = [
           Sassy: [22, 20, 58],
           Careful: [42, 5, 53],
           Quirky: [56, 22, 22],
-        }[pokemon.getNature().name]
+        }[pokemon.getNature().name];
       } else {
         moveChances = {
           Hardy: [61, 7, 32],
@@ -349,7 +348,7 @@ let Formats = [
           Sassy: [18, 70, 12],
           Careful: [42, 50, 8],
           Quirky: [56, 22, 22],
-        }[pokemon.getNature().name]
+        }[pokemon.getNature().name];
       }
       let categoryChoice = ['Attack', 'Defense', 'Support'][randomDiscreteDistribution(moveChances, this.prng)];
       let choicePool = sortedMoves[categoryChoice];
@@ -374,4 +373,6 @@ let Formats = [
     },
     // TODO: message that a Pokemon has gone below half health
   },
-]
+];
+
+//exports.Formats = Formats;

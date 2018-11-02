@@ -1,3 +1,5 @@
+/* global toId */
+
 'use strict';
 
 const BattleLauncherItems = require('./launcher-items').BattleLauncherItems;
@@ -12,36 +14,6 @@ class LauncherItem extends Data.Effect {
 
     this.effectType = 'LauncherItem';
   }
-}
-
-/**
- * Like string.split(delimiter), but only recognizes the first `limit`
- * delimiters (default 1).
- *
- * `"1 2 3 4".split(" ", 2) => ["1", "2"]`
- *
- * `Chat.splitFirst("1 2 3 4", " ", 1) => ["1", "2 3 4"]`
- *
- * Returns an array of length exactly limit + 1.
- *
- * @param {string} str
- * @param {string} delimiter
- * @param {number} [limit]
- */
-function splitFirst(str, delimiter, limit = 1) {
-  let splitStr = /** @type {string[]} */ ([]);
-  while (splitStr.length < limit) {
-    let delimiterIndex = str.indexOf(delimiter);
-    if (delimiterIndex >= 0) {
-      splitStr.push(str.slice(0, delimiterIndex));
-      str = str.slice(delimiterIndex + delimiter.length);
-    } else {
-      splitStr.push(str);
-      str = '';
-    }
-  }
-  splitStr.push(str);
-  return splitStr;
 }
 
 exports.BattleScripts = {
@@ -293,44 +265,45 @@ exports.BattleScripts = {
         }
 
         switch (choiceType) {
-        case 'move':
-          let targetLoc = 0;
-          if (/\s-?[1-3]$/.test(data)) {
-            targetLoc = parseInt(data.slice(-2));
-            data = data.slice(0, data.lastIndexOf(' '));
+          case 'move': {
+            let targetLoc = 0;
+            if (/\s-?[1-3]$/.test(data)) {
+              targetLoc = parseInt(data.slice(-2));
+              data = data.slice(0, data.lastIndexOf(' '));
+            }
+            const willMega = data.endsWith(' mega') ? 'mega' : '';
+            if (willMega) data = data.slice(0, -5);
+            const willUltra = data.endsWith(' ultra') ? 'ultra' : '';
+            if (willUltra) data = data.slice(0, -6);
+            const willZ = data.endsWith(' zmove') ? 'zmove' : '';
+            if (willZ) data = data.slice(0, -6);
+            this.chooseMove(data, targetLoc, willMega || willUltra || willZ);
+            break;
           }
-          const willMega = data.endsWith(' mega') ? 'mega' : '';
-          if (willMega) data = data.slice(0, -5);
-          const willUltra = data.endsWith(' ultra') ? 'ultra' : '';
-          if (willUltra) data = data.slice(0, -6);
-          const willZ = data.endsWith(' zmove') ? 'zmove' : '';
-          if (willZ) data = data.slice(0, -6);
-          this.chooseMove(data, targetLoc, willMega || willUltra || willZ);
-          break;
-        case 'switch':
-          this.chooseSwitch(data);
-          break;
-        case 'shift':
-          if (data) return this.emitChoiceError(`Unrecognized data after "shift": ${data}`);
-          this.chooseShift();
-          break;
-        case 'team':
-          if (this.chooseTeam(data)) this.chooseTeam();
-          break;
-        case 'pass':
-        case 'skip':
-          if (data) return this.emitChoiceError(`Unrecognized data after "pass": ${data}`);
-          this.choosePass();
-          break;
-        case 'default':
-          this.autoChoose();
-          break;
-        case 'launch':
-          this.chooseLaunch(data);
-          break;
-        default:
-          this.emitChoiceError(`Unrecognized choice: ${choiceString}`);
-          break;
+          case 'switch':
+            this.chooseSwitch(data);
+            break;
+          case 'shift':
+            if (data) return this.emitChoiceError(`Unrecognized data after "shift": ${data}`);
+            this.chooseShift();
+            break;
+          case 'team':
+            if (this.chooseTeam(data)) this.chooseTeam();
+            break;
+          case 'pass':
+          case 'skip':
+            if (data) return this.emitChoiceError(`Unrecognized data after "pass": ${data}`);
+            this.choosePass();
+            break;
+          case 'default':
+            this.autoChoose();
+            break;
+          case 'launch':
+            this.chooseLaunch(data);
+            break;
+          default:
+            this.emitChoiceError(`Unrecognized choice: ${choiceString}`);
+            break;
         }
       }
 
@@ -398,7 +371,7 @@ exports.BattleScripts = {
       const targetPokemon = this.pokemon[slot];
       // We have a target. Exit out if the pokemon is embargoed
       if (targetPokemon.volatiles['embargo']) {
-        return this.emitChoiceError(`Can't launch: ${targetPokemon.name} can't use items`)
+        return this.emitChoiceError(`Can't launch: ${targetPokemon.name} can't use items`);
       }
 
       // Step 2: Find the item we're using, and if it's an item like Ether, on which move we are using it.
@@ -502,23 +475,23 @@ exports.BattleScripts = {
       return this.choice.actions.map(action => {
         let details;
         switch (action.choice) {
-        case 'move':
-          details = ``;
-          if (action.targetLoc && this.active.length > 1) details += ` ${action.targetLoc}`;
-          if (action.mega) details += ` mega`;
-          if (action.zmove) details += ` zmove`;
-          return `move ${action.moveid}${details}`;
-        case 'switch':
-        case 'instaswitch':
-          return `switch ${action.target.position + 1}`;
-        case 'team':
-          return `team ${action.pokemon.position + 1}`;
-        case 'launch':
-          details = `launch ${action.pokemon.position + 1} ${action.item.id}`;
-          if (action.move) details += ` ${action.move}`;
-          return details;
-        default:
-          return action.choice;
+          case 'move':
+            details = ``;
+            if (action.targetLoc && this.active.length > 1) details += ` ${action.targetLoc}`;
+            if (action.mega) details += ` mega`;
+            if (action.zmove) details += ` zmove`;
+            return `move ${action.moveid}${details}`;
+          case 'switch':
+          case 'instaswitch':
+            return `switch ${action.target.position + 1}`;
+          case 'team':
+            return `team ${action.pokemon.position + 1}`;
+          case 'launch':
+            details = `launch ${action.pokemon.position + 1} ${action.item.id}`;
+            if (action.move) details += ` ${action.move}`;
+            return details;
+          default:
+            return action.choice;
         }
       }).join(', ');
     },
@@ -534,4 +507,4 @@ exports.BattleScripts = {
       if (this.currentRequest === 'move') this.send('-message', `You currently have ${this.launcherPoints} Wonder Launcher points. (placeholder)`);
     },
   },
-}
+};

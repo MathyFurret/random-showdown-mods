@@ -6,7 +6,7 @@ let BattleMovedex = {
     inherit: true,
     onHit: function (target) {
       let newType;
-      switch(this.colosseum) {
+      switch (this.colosseum) {
         case 'gateway':
           newType = 'Water';
           break;
@@ -59,7 +59,7 @@ let BattleMovedex = {
     inherit: true,
     onHit: function (pokemon) {
       let move;
-      switch(this.colosseum) {
+      switch (this.colosseum) {
         case 'gateway':
           move = 'hydropump';
           break;
@@ -80,7 +80,7 @@ let BattleMovedex = {
   },
   solarbeam: {
     inherit: true,
-    onBasePower: function (basePower, pokemon, target) {
+    onBasePower: function (basePower) {
       if (this.isWeather(['raindance', 'primordialsea', 'sandstorm', 'hail', 'fog'])) {
         this.debug('weakened by weather');
         return this.chainModify(0.5);
