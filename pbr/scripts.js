@@ -12,7 +12,7 @@ let BattleScripts = {
 
   //add misc events to battle functions so we can handle them in the announcer rule
   nextTurn() {
-    Object.getProtoTypeOf(this).nextTurn.call(this);
+    Object.getPrototypeOf(this).nextTurn.call(this);
     this.runEvent('BeginTurn');
   },
 
