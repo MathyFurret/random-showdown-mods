@@ -398,8 +398,8 @@ let Formats = [
       }
       return problems;
     },
-    onAfterMoveSecondaryPriority: 10,
-    onAfterMoveSecondary: function(target, source, move) {
+    onAfterMovePriority: -10,
+    onAfterMove: function(source, target, move) {
       if (move.category === 'Status' || !target.hp) return;
 
       // stat drops
@@ -414,7 +414,7 @@ let Formats = [
       }
       if (boosted) {
         this.add('-clearnegativeboost', source);
-        this.boost(negativeBoosts);
+        this.boost(negativeBoosts, target, source);
       }
 
       // Data from volatiles, etc. that makes no sense to copy; everything else should be copied
@@ -426,14 +426,14 @@ let Formats = [
           let oldData = source.side.sideConditions[sideCondition];
           source.side.removeSideCondition(sideCondition);
           this.add('-sideend', source.side, this.getEffect(sideCondition).name);
-          let result = target.side.addSideCondition(sideCondition);
+          let result = target.side.addSideCondition(sideCondition, source);
           if (result) {
             for (let i in oldData) {
               if (!noCopy.includes(i)) {
                 if (i === 'layers' && oldData[i] > 1) {
                   // Tox/spikes layers, pass all of them
                   for (let l = 1; l < oldData[i]; l++) {
-                    target.side.addSideCondition(sideCondition);
+                    target.side.addSideCondition(sideCondition, source);
                   }
                 } else {
                   target.side.sideConditions[sideCondition][i] = oldData[i];
@@ -448,7 +448,7 @@ let Formats = [
       if (source.status) {
         let oldData = source.statusData;
         source.cureStatus();
-        let result = target.trySetStatus(oldData.id);
+        let result = target.trySetStatus(oldData.id, source);
         if (result) {
           for (let i in oldData) {
             if (!noCopy.includes(i)) {
@@ -467,7 +467,7 @@ let Formats = [
           if (oldData.linkedStatus) {
             result = target.addVolatile(volatile, source, null, oldData.linkedStatus);
           } else {
-            result = target.addVolatile(volatile);
+            result = target.addVolatile(volatile, source);
           }
           if (result) {
             for (let i in oldData) {
