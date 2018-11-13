@@ -390,6 +390,7 @@ let Formats = [
 
     mod: 'gen7',
     ruleset: ['[Gen 7] OU'],
+    banlist: ["Perish Song"],
     onValidateSet: function(set) {
       let problems = [];
       for (const moveid in set.moves) {
