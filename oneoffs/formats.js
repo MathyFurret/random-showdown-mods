@@ -373,6 +373,113 @@ let Formats = [
     },
     // TODO: message that a Pokemon has gone below half health
   },
+
+  {
+    /**
+      * Hot Potato
+      *
+      * Meta by TDA on Smogon
+      * Thread: https://www.smogon.com/forums/threads/hot-potato.3643676/
+      * Code by mathfreak231
+      */
+    name: "[Gen 7] Hot Potato",
+    desc: `All attacking moves transfer stat drops, entry hazards, statuses, and volatiles to the target.`,
+    threads: [
+      `&bullet; <a href="https://www.smogon.com/forums/threads/hot-potato.3643676/">Hot Potato</a>`,
+    ],
+
+    mod: 'gen7',
+    ruleset: ['[Gen 7] OU'],
+    onValidateSet: function(set) {
+      let problems = [];
+      for (const moveid in set.moves) {
+        const move = this.getMove(moveid);
+        if (move.self && move.self.volatileStatus === "mustrecharge") problems.push(`${set.name || set.species}'s move ${move.name} is banned.`);
+      }
+      return problems;
+    },
+    onAfterMoveSecondaryPriority: 10,
+    onAfterMoveSecondary: function(target, source, move) {
+      if (move.category === 'Status') return;
+
+      // stat drops
+      let negativeBoosts = {};
+      let boosted = false;
+      for (let stat in source.boosts) {
+        if (source.boosts[stat] < 0) {
+          boosted = true;
+          negativeBoosts[stat] = source.boosts[stat];
+          source.boosts[stat] = 0;
+        }
+      }
+      if (boosted) {
+        this.add('-clearnegativeboost', source);
+        this.boost(negativeBoosts);
+      }
+
+      // Data from volatiles, etc. that makes no sense to copy; everything else should be copied
+      const noCopy = ['id', 'target', 'source', 'sourceEffect', 'sourcePosition', 'linkedStatus', 'linkedPokemon', 'move'];
+
+      // side conditions
+      for (const sideCondition of ['stealthrock', 'spikes', 'toxicspikes', 'stickyweb']) {
+        if (source.side.sideConditions[sideCondition]) {
+          let oldData = source.side.sideConditions[sideCondition];
+          source.side.removeSideCondition(sideCondition);
+          this.add('-sideend', source.side, this.getEffect(sideCondition).name);
+          let result = target.side.addSideCondition(sideCondition);
+          if (result) {
+            for (let i in oldData) {
+              if (!noCopy.includes(i)) {
+                if (i === 'layers' && oldData[i] > 1) {
+                  // Tox/spikes layers, pass all of them
+                  for (let l = 1; l < oldData[i]; l++) {
+                    target.side.addSideCondition(sideCondition);
+                  }
+                } else {
+                  target.side.sideConditions[sideCondition][i] = oldData[i];
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // status
+      if (source.status) {
+        let oldData = source.statusData;
+        source.cureStatus();
+        let result = target.trySetStatus(oldData.id);
+        if (result) {
+          for (let i in oldData) {
+            if (!noCopy.includes(i)) {
+              target.statusData[i] = oldData[i];
+            }
+          }
+        }
+      }
+
+      // volatiles
+      for (const volatile of ['confusion', 'trapped', 'partiallytrapped', 'taunt', 'encore', 'leechseed', 'torment', 'disable', 'attract', 'perishsong', 'telekinesis', 'nightmare', 'curse', 'healblock', 'embargo', 'miracleeye', 'foresight']) {
+        if (source.volatiles[volatile]) {
+          let oldData = source.volatiles[volatile];
+          source.removeVolatile(volatile);
+          let result;
+          if (oldData.linkedStatus) {
+            result = target.addVolatile(volatile, source, null, oldData.linkedStatus);
+          } else {
+            result = target.addVolatile(volatile);
+          }
+          if (result) {
+            for (let i in oldData) {
+              if (!noCopy.includes(i)) {
+                target.volatiles[volatile][i] = oldData[i];
+              }
+            }
+          }
+        }
+      }
+    },
+  },
 ];
 
 //exports.Formats = Formats;
