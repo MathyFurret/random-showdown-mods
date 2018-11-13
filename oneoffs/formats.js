@@ -383,7 +383,7 @@ let Formats = [
       * Code by mathfreak231
       */
     name: "[Gen 7] Hot Potato",
-    desc: `All attacking moves transfer stat drops, entry hazards, statuses, and volatiles to the target.`,
+    desc: `All attacking moves transfer stat drops, entry hazards, statuses, and certain volatiles to the target.`,
     threads: [
       `&bullet; <a href="https://www.smogon.com/forums/threads/hot-potato.3643676/">Hot Potato</a>`,
     ],
@@ -400,7 +400,7 @@ let Formats = [
     },
     onAfterMoveSecondaryPriority: 10,
     onAfterMoveSecondary: function(target, source, move) {
-      if (move.category === 'Status') return;
+      if (move.category === 'Status' || !target.hp) return;
 
       // stat drops
       let negativeBoosts = {};
