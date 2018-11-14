@@ -399,9 +399,13 @@ let Formats = [
       }
       return problems;
     },
+    onAfterSubDamage: function(damage, target, source, move) {
+      // Substitute hack
+      move.hitSub = true;
+    },
     onAfterMovePriority: -10,
     onAfterMove: function(source, target, move) {
-      if (move.category === 'Status' || !target.hp) return;
+      if (move.category === 'Status' || !target.hp || move.hitSub) return;
 
       // stat drops
       let negativeBoosts = {};
