@@ -403,9 +403,12 @@ let Formats = [
       // Substitute hack
       move.hitSub = true;
     },
+		onAfterMoveSecondary: function(target, source, move) {
+			if (move.category !== 'Status' && !move.hitSub) move.willPass = true;
+		},
     onAfterMovePriority: -10,
     onAfterMove: function(source, target, move) {
-      if (move.category === 'Status' || !target.hp || move.hitSub) return;
+      if (!target.hp || !move.willPass) return;
 
       // stat drops
       let negativeBoosts = {};
