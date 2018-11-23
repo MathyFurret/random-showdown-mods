@@ -27,6 +27,13 @@ let BattleMovedex = {
       this.add('-start', target, 'typechange', newType);
     },
   },
+  chatter: {
+    inherit: true,
+    secondary: {
+      chance: 1,
+      volatileStatus: 'confusion',
+    },
+  },
   hypnosis: {
     inherit: true,
     accuracy: 70,
@@ -76,6 +83,31 @@ let BattleMovedex = {
           move = 'triattack';
       }
       this.useMove(move, pokemon);
+    },
+  },
+  secretpower: {
+    inherit: true,
+    secondary: {
+      chance: 30,
+      onHit: function(target, source, move) {
+        switch (this.colosseum) {
+          case 'gateway':
+            this.boost({atk: -1}, target, source, null, true);
+            break;
+          case 'waterfall': case 'sunnypark':
+            target.trySetStatus('slp');
+            break;
+          case 'crystal': case 'magma': case 'stargazer':
+            target.addVolatile('flinch');
+            break;
+          case 'sunset':
+            this.boost({accuracy: -1}, target, source, null, true);
+            break;
+          default:
+            target.trySetStatus('par');
+            break;
+        }
+      },
     },
   },
   solarbeam: {
