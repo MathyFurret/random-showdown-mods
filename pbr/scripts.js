@@ -11,6 +11,7 @@ let BattleScripts = {
   },
 
   //add misc events to battle functions so we can handle them in the announcer rule
+  /*
   nextTurn() {
     Object.getPrototypeOf(this).nextTurn.call(this);
     this.runEvent('BeginTurn');
@@ -45,6 +46,7 @@ let BattleScripts = {
     }
     return true;
   },
+  */
 
   side: {
     getColor() {

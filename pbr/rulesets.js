@@ -1,5 +1,6 @@
 'use strict';
 
+/*
 // After-damage move lines.
 // All of these except Focus Punch play when a move deals fatal damage.
 const MOVE_LINES = {
@@ -109,9 +110,11 @@ const CAN_WEATHER_WEAK_LINE = [
   'fireblast', 'flareblitz',
   'hydropump', 'hydrocannon',
 ];
+*/
 
 /**@type {{[k: string]: ModdedFormatsData}} */
 let BattleFormats = {
+  /*
   pbrannouncer: {
     // ok this is just me playing around with the events system Kappa
     // My goal is to accurately emulate PRChase whenever possible,
@@ -311,6 +314,7 @@ let BattleFormats = {
       this.announce(line.join(' '));
     },
   },
+  */
   pbrsleepclause: {
     // TODO: Does the source actually matter?
     effectType: "Rule",
