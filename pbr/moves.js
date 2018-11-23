@@ -34,6 +34,21 @@ let BattleMovedex = {
       volatileStatus: 'confusion',
     },
   },
+  furycutter: {
+    inherit: true,
+    effect: {
+      duration: 2,
+      onStart: function () {
+        this.effectData.multiplier = 1;
+      },
+      onRestart: function () {
+        if (this.effectData.multiplier < 16) this.effectData.multiplier *= 2;
+      },
+      onAfterMoveSecondarySelf: function() {
+        this.effectData.duration = 2;
+      },
+    }
+  }
   hypnosis: {
     inherit: true,
     accuracy: 70,
