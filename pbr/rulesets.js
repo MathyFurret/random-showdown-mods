@@ -357,8 +357,7 @@ let BattleFormats = {
     effectType: "Rule",
     name: "PBR Self-Destruct Clause",
     desc: "Causes Self-Destruct and Explosion to lose the battle for the user if all remaining Pok&eacute;mon faint from such a move.",
-    // Should be implemented in scripts.js
-    // TODO: actually implement
+    // Implemented in scripts.js
   },
   pbrdestinybondclause: {
     effectType: "Rule",

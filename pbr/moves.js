@@ -48,7 +48,7 @@ let BattleMovedex = {
         this.effectData.duration = 2;
       },
     }
-  }
+  },
   hypnosis: {
     inherit: true,
     accuracy: 70,
