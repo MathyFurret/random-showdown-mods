@@ -48,29 +48,6 @@ let BattleScripts = {
   },
   */
 
-  // Temporary fix to properly draw matches
-  residualEvent(eventid, relayVar) {
-		let statuses = this.getRelevantEffectsInner(this, 'on' + eventid, null, null, false, true, 'duration');
-		statuses.sort((a, b) => this.comparePriority(a, b));
-		while (statuses.length) {
-			let statusObj = statuses[0];
-			statuses.shift();
-			let status = statusObj.status;
-			if (statusObj.thing.fainted) continue;
-			if (statusObj.statusData && statusObj.statusData.duration) {
-				statusObj.statusData.duration--;
-				if (!statusObj.statusData.duration) {
-					statusObj.end.call(statusObj.thing, status.id);
-					continue;
-				}
-			}
-			this.singleEvent(eventid, status, statusObj.statusData, statusObj.thing, relayVar);
-
-      this.faintMessages();
-      if (this.ended) return;
-		}
-	},
-
   faintMessages(lastFirst = false) {
     if (this.ended) return;
 		if (!this.faintQueue.length) return false;

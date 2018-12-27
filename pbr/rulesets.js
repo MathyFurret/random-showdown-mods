@@ -366,7 +366,7 @@ let BattleFormats = {
     onTryMove: function(pokemon, target, move) {
       const bannedMoves = ['perishsong', 'destinybond'];
       if (bannedMoves.includes(move.id) && !this.canSwitch(pokemon.side)) {
-        this.add('-fail', target);
+        this.add('-fail', pokemon);
         return false;
       }
     },
